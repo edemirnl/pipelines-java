@@ -3,20 +3,19 @@
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
 
-trigger:
-- main
+trigger: none
 
 pool:
-  vmImage: ubuntu-latest
-
+  name: Default 
 steps:
-- task: Maven@3
+- task: AzureCLI@2
   inputs:
-    mavenPomFile: 'pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.11'
-    jdkArchitectureOption: 'x64'
-    publishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'package'
+    azureSubscription: 'roleasc'   # Service Connection adın
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      echo "Assigning Contributor role to user..."
+      az role assignment create \
+        --assignee 8662b771-5dc0-4b2c-8c60-2cf75dd12ae9 \
+        --role "Contributor" \
+        --scope /subscriptions/fe261f48-3d9f-414f-b081-a4ccd33202f4
