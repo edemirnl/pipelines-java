@@ -1,21 +1,44 @@
-# Maven
-# Build your Java project and run tests with Apache Maven.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+parameters:
+- name: subscriptionId
+  displayName: Azure Subscription ID
+  type: string
+  default: 'fe261f48-3d9f-414f-b081-a4ccd33202f4'  # Varsayılan abonelik ID'niz
 
-trigger: none
+- name: resourceGroupName
+  displayName: Resource Group Name
+  type: string
+  default: 'TestResourceGroup'
+
+- name: location
+  displayName: Azure Region
+  type: string
+  default: 'westeurope'
+  values:
+  - 'eastus'
+  - 'westeurope'
+  - 'northeurope'
+  - 'southeastasia'
+
+trigger: none  # Manuel çalıştırma için
 
 pool:
-  name: Default 
+  name: Default
+
 steps:
 - task: AzureCLI@2
   inputs:
-    azureSubscription: 'roleasc'   # Service Connection adın
-    scriptType: 'bash'
+    azureSubscription: 'ed-sc'  # Service connection adı
+    scriptType: 'ps'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      echo "Assigning Contributor role to user..."
-      az role assignment create \
-        --assignee 8662b771-5dc0-4b2c-8c60-2cf75dd12ae9 \
-        --role "Contributor" \
-        --scope /subscriptions/fe261f48-3d9f-414f-b081-a4ccd33202f4
+      # Parametrelerden gelen değerleri kullanma
+      az account set --subscription ${{ parameters.subscriptionId }}
+      
+      Write-Host "Creating Resource Group: ${{ parameters.resourceGroupName }} in ${{ parameters.location }}"
+      
+      az group create `
+        --name ${{ parameters.resourceGroupName }} `
+        --location ${{ parameters.location }}
+      
+      # Oluşturulan RG bilgilerini görüntüleme
+      az group show --name ${{ parameters.resourceGroupName }}
